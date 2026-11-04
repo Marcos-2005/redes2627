@@ -6,19 +6,30 @@ def crear_vpc_subnet_ec2():
     # VPC
     vpc = ec2.create_vpc(CidrBlock='193.168.5.0/16')
     vpc_id = vpc['Vpc']['VpcId']
-    print(f"VPC ID: {vpc_id}")
+    
+    ec2.create_tags(
+        Resources=[vpc_id],
+        Tags=[{'Key': 'Name', 'Value': 'VPC-Marcos'},
+              {'Key': 'entorno', 'Value': 'prueba'}]
+    )
+    print(f"VPC ID: {vpc_id} ")
 
-    # 2. Subnet
+    # Subred
     subnet = ec2.create_subnet(
         VpcId=vpc_id,
         CidrBlock='193.168.5.0/24'
     )
     subnet_id = subnet['Subnet']['SubnetId']
+    
+    ec2.create_tags(
+        Resources=[subnet_id],
+        Tags=[{'Key': 'Name', 'Value': 'Subnet-Publica'}]
+    )
     print(f"Subnet ID: {subnet_id}")
 
-    # 3. Instancia EC2
+    # Instancia EC2
     instancia = ec2.run_instances(
-        ImageId='ami-0bfc5cae5711ffac8',
+        ImageId='ami-0d97d7f07b25dd693',
         InstanceType='t2.micro',
         MinCount=1,
         MaxCount=1,
@@ -26,7 +37,12 @@ def crear_vpc_subnet_ec2():
         KeyName='vockey'
     )
     instance_id = instancia['Instances'][0]['InstanceId']
-    print(f"Instancia EC2 ID: {instance_id}")
+    
+    ec2.create_tags(
+        Resources=[instance_id],
+        Tags=[{'Key': 'Name', 'Value': 'Servidor-Ubuntu'}]
+    )
+    print(f"Instancia EC2 ID: {instance_id} ")
 
     return vpc_id, subnet_id, instance_id
 

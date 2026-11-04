@@ -91,13 +91,13 @@ def configurar_red_y_ec2():
 
     # Lanzar Instancia EC2
     instancia = ec2.run_instances(
-        ImageId='ami-0bfc5cae5711ffac8',  # Asegúrate de que esta AMI sea válida en tu región de AWS Academy
+        ImageId='ami-0d97d7f07b25dd693',
         InstanceType='t2.micro',
         MinCount=1,
         MaxCount=1,
         SubnetId=subnet_id,
         SecurityGroupIds=[sg_id],
-        KeyName='vockey',  # Par de claves estándar de los laboratorios AWS Academy
+        KeyName='vockey', 
         TagSpecifications=[{
             'ResourceType': 'instance',
             'Tags': [{'Key': 'Name', 'Value': 'MiEC2-Boto3'}]

@@ -111,4 +111,4 @@ def configurar_red_y_ec2():
 
 if __name__ == "__main__":
     instance_id = configurar_red_y_ec2()
-    print(f"✨✨✨ Proceso completado, id instancia: {instance_id}✨✨✨")
+    print(f"Proceso completado, id instancia: {instance_id}")

@@ -20,6 +20,11 @@ def crear_infraestructura():
     )
     subnet_pub_id = subnet_pub['Subnet']['SubnetId']
     
+    ec2.modify_subnet_attribute(
+        SubnetId=subnet_pub_id,
+        MapPublicIpOnLaunch={'Value': True}
+    )
+
     ec2.create_tags(
         Resources=[subnet_pub_id],
         Tags=[{'Key': 'Name', 'Value': 'Subnet-Publica'}]

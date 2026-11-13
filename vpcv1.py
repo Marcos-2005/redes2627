@@ -59,7 +59,17 @@ def crear_infraestructura():
     )
     print(f"Subnet Privada ID: {subnet_priv_id}")
 
-    # Creación de grupo de seguridad
+    # Tabla de enrutamiento
+    route_table = ec2.create_route_table(VpcId=vpc_id)
+    route_table_id = route_table['RouteTable']['RouteTableId']
+    
+    ec2.create_tags(
+        Resources=[route_table_id],
+        Tags=[{'Key': 'Name', 'Value': 'RT-Publica'}]
+    )
+    print(f"Route Table ID: {route_table_id}")
+
+    # Grupo de seguridad
     security_group = ec2.create_security_group(
         GroupName='SG-Practica',
         Description='Grupo de seguridad para la VPC de Marcos',
@@ -109,7 +119,7 @@ def crear_infraestructura():
     )
     print(f"EC2 Privada ID: {instance_priv_id}")
 
-    return vpc_id, igw_id, subnet_pub_id, subnet_priv_id, sg_id, instance_pub_id, instance_priv_id
+    return vpc_id, igw_id, subnet_pub_id, subnet_priv_id, route_table_id, sg_id, instance_pub_id, instance_priv_id
 
 if __name__ == "__main__":
     crear_infraestructura()

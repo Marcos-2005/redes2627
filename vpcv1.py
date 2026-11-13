@@ -3,7 +3,7 @@ import boto3
 def crear_infraestructura():
     ec2 = boto3.client('ec2')
 
-    # VPC
+    # Creación VPC
     vpc = ec2.create_vpc(CidrBlock='172.16.0.0/16')
     vpc_id = vpc['Vpc']['VpcId']
     
@@ -13,7 +13,22 @@ def crear_infraestructura():
     )
     print(f"VPC ID: {vpc_id}")
 
-    # Subred Pública
+    # Crear el IGW para poder salir al exterior
+    igw = ec2.create_internet_gateway()
+    igw_id = igw['InternetGateway']['InternetGatewayId']
+    
+    ec2.create_tags(
+        Resources=[igw_id],
+        Tags=[{'Key': 'Name', 'Value': 'IGW-Marcos'}]
+    )
+    
+    ec2.attach_internet_gateway(
+        InternetGatewayId=igw_id,
+        VpcId=vpc_id
+    )
+    print(f"Internet Gateway ID: {igw_id}")
+
+    # Creación subred (Pública)
     subnet_pub = ec2.create_subnet(
         VpcId=vpc_id,
         CidrBlock='172.16.0.0/20'
@@ -31,7 +46,7 @@ def crear_infraestructura():
     )
     print(f"Subnet Publica ID: {subnet_pub_id}")
 
-    # Subred Privada
+    # Creación subred (Privada)
     subnet_priv = ec2.create_subnet(
         VpcId=vpc_id,
         CidrBlock='172.16.64.0/20'
@@ -44,10 +59,21 @@ def crear_infraestructura():
     )
     print(f"Subnet Privada ID: {subnet_priv_id}")
 
-    # Grupo de Seguridad
-    sg_id = 'sg-0ee6888e4a1e83a4f'
+    # Creación de grupo de seguridad
+    security_group = ec2.create_security_group(
+        GroupName='SG-Practica',
+        Description='Grupo de seguridad para la VPC de Marcos',
+        VpcId=vpc_id
+    )
+    sg_id = security_group['GroupId']
 
-    # Instancia EC2 en Subred Pública
+    ec2.create_tags(
+        Resources=[sg_id],
+        Tags=[{'Key': 'Name', 'Value': 'SG-Acceso'}]
+    )
+    print(f"Security Group ID: {sg_id}")
+
+    # Creación EC2 (Instancia Pública)
     instancia_pub = ec2.run_instances(
         ImageId='ami-0d97d7f07b25dd693',
         InstanceType='t2.micro',
@@ -65,7 +91,7 @@ def crear_infraestructura():
     )
     print(f"EC2 Publica ID: {instance_pub_id}")
 
-    # Instancia EC2 en Subred Privada
+    # Creación EC2 (Instancia Privada)
     instancia_priv = ec2.run_instances(
         ImageId='ami-0d97d7f07b25dd693',
         InstanceType='t2.micro',
@@ -83,7 +109,7 @@ def crear_infraestructura():
     )
     print(f"EC2 Privada ID: {instance_priv_id}")
 
-    return vpc_id, subnet_pub_id, subnet_priv_id, instance_pub_id, instance_priv_id
+    return vpc_id, igw_id, subnet_pub_id, subnet_priv_id, sg_id, instance_pub_id, instance_priv_id
 
 if __name__ == "__main__":
     crear_infraestructura()

@@ -69,6 +69,14 @@ def crear_infraestructura():
     )
     print(f"Route Table ID: {route_table_id}")
 
+    # 4. Agregamos una ruta para la salida a internet
+    ec2.create_route(
+        RouteTableId=route_table_id,
+        DestinationCidrBlock='0.0.0.0/0',
+        GatewayId=igw_id
+    )
+    print(f"Ruta 0.0.0.0/0 añadida hacia el IGW: {igw_id}")
+
     # Grupo de seguridad
     security_group = ec2.create_security_group(
         GroupName='SG-Practica',

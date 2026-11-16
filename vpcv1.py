@@ -69,13 +69,20 @@ def crear_infraestructura():
     )
     print(f"Route Table ID: {route_table_id}")
 
-    # 4. Agregamos una ruta para la salida a internet
+    # Salida a internet
     ec2.create_route(
         RouteTableId=route_table_id,
         DestinationCidrBlock='0.0.0.0/0',
         GatewayId=igw_id
     )
     print(f"Ruta 0.0.0.0/0 añadida hacia el IGW: {igw_id}")
+
+    # Asociar la tabla de enrutamiento a la subred pública
+    ec2.associate_route_table(
+        RouteTableId=route_table_id,
+        SubnetId=subnet_pub_id
+    )
+    print(f"Tabla de enrutamiento {route_table_id} asociada a la subred {subnet_pub_id}")
 
     # Grupo de seguridad
     security_group = ec2.create_security_group(
@@ -88,6 +95,24 @@ def crear_infraestructura():
     ec2.create_tags(
         Resources=[sg_id],
         Tags=[{'Key': 'Name', 'Value': 'SG-Acceso'}]
+    )
+
+    ec2.authorize_security_group_ingress(
+        GroupId=sg_id,
+        IpPermissions=[
+            {
+                'IpProtocol': 'tcp',
+                'FromPort': 22,
+                'ToPort': 22,
+                'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
+            },
+            {
+                'IpProtocol': 'icmp',
+                'FromPort': -1,
+                'ToPort': -1,
+                'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
+            }
+        ]
     )
     print(f"Security Group ID: {sg_id}")
 
